@@ -28,7 +28,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = player_image_right
-        
+        self.new_x = 0
+        self.new_y = 0
         self.rect = self.image.get_rect()
         
     def update(self):
@@ -62,17 +63,33 @@ def main():
     # -------- Main Program Loop -----------
     while not done:
         
+        active_sprite_list = pygame.sprite.Group()
+        
         player = Player()
-        player.rect.x = 300
-        player.rect.y = 600
+        player.rect.x = 340
+        player.rect.y = SCREEN_HEIGHT - player.rect.height
+        active_sprite_list.add(player)        
         
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
-                
-        # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.go_left()
+                if event.key == pygame.K_RIGHT:
+                    player.go_right()
+            
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT and player.new_x < 0:
+                    player.stop()
+                if event.key == pygame.K_RIGHT and player.new_x > 0:
+                    player.stop()
         
+        active_sprite_list.update() 
+        
+        # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
+        active_sprite_list.draw(screen)
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
         
         # Limit to 60 frames per second
