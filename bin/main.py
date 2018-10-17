@@ -20,8 +20,8 @@ SCREEN_HEIGHT = 600
 # Images
 
 # Player
-player_image_right = pygame.image.load('\sprites\player_image_right.png')
-player_image_left = pygame.image.load('\sprites\player_image_left.png')
+player_image_right = pygame.image.load('player_right.png')
+player_image_left = pygame.image.load('player_left.png')
 
 
 class Player(pygame.sprite.Sprite):
