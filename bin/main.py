@@ -119,6 +119,42 @@ class Level(object):
  
         for enemy in self.enemy_list:
             enemy.rect.x += shift_x
+class Platform(pygame.sprite.Sprite):
+    """ Platform the user can jump on """
+ 
+    def __init__(self, width, height):
+        """ Platform constructor. Assumes constructed with user passing in
+            an array of 5 numbers like what's defined at the top of this
+            code. """
+        super().__init__()
+ 
+        self.image = pygame.Surface([width, height])
+        self.image.fill(GREEN)
+ 
+        self.rect = self.image.get_rect()
+
+class Level_01(Level):
+    """ Definition for level 1. """
+ 
+    def __init__(self, player):
+        """ Create level 1. """
+ 
+        # Call the parent constructor
+        Level.__init__(self, player)
+ 
+        # Array with width, height, x, and y of platform
+        level = [[210, 70, 500, 500],
+                 [210, 70, 200, 400],
+                 [210, 70, 600, 300],
+                 ]
+ 
+        # Go through the array above and add platforms
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)
             
 def main():
     """ Main Program """
@@ -132,23 +168,27 @@ def main():
     
     # Loop until the user clicks the close button.
     done = False
- 
-    # Used to manage how fast the screen updates
-    clock = pygame.time.Clock()  
-    # Create all the levels
-    level_list = []
-    level_list.append(Level_01(player))
-    level_list.append(Level_02(player))
- 
-    # Set the current level
-    current_level_no = 0
-    current_level = level_list[current_level_no]    
-    active_sprite_list = pygame.sprite.Group()
-    
+    all_sprites_list = pygame.sprite.Group()
     player = Player()
     player.rect.x = 340
     player.rect.y = SCREEN_HEIGHT - player.rect.height
-    active_sprite_list.add(player)    
+    all_sprites_list.add(player)    
+    # Create all the levels
+    level_list = []
+    level_list.append(Level_01(player))
+    #level_list.append(Level_02(player))    
+    # Set the current level
+    current_level_no = 0
+    current_level = level_list[current_level_no]    
+        
+         
+    # Used to manage how fast the screen updates
+    clock = pygame.time.Clock()  
+    
+ 
+    
+    
+       
     
     # -------- Main Program Loop -----------
     while not done:
@@ -176,7 +216,7 @@ def main():
                 if event.key == pygame.K_UP and player.new_y == JUMP_FORCE:
                     player.stop()
         
-        active_sprite_list.update() 
+        all_sprites_list.update() 
         # Update items in the level
         current_level.update()
     
@@ -207,7 +247,7 @@ def main():
         
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
         current_level.draw(screen)
-        active_sprite_list.draw(screen)
+        all_sprites_list.draw(screen)
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
         
         # Limit to 60 frames per second
