@@ -184,6 +184,7 @@ class Level(object):
     def update(self):
         """ Update everything in this level."""
         self.platform_list.update()
+        self.player = player
         self.enemy_list.update()
  
     def draw(self, screen):
@@ -222,6 +223,70 @@ class Platform(pygame.sprite.Sprite):
         self.image.fill((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
  
         self.rect = self.image.get_rect()
+        
+class MovingPlatform(Platform):
+    """ This is a fancier platform that can actually move. """
+    change_x = 0
+    change_y = 0
+ 
+    boundary_top = 0
+    boundary_bottom = 0
+    boundary_left = 0
+    boundary_right = 0
+ 
+    player = None
+ 
+    level = None
+ 
+    def update(self):
+        """ Move the platform.
+            If the player is in the way, it will shove the player
+            out of the way. This does NOT handle what happens if a
+            platform shoves a player into another object. Make sure
+            moving platforms have clearance to push the player around
+            or add code to handle what happens if they don't. """
+ 
+        # Move left/right
+        self.rect.x += self.change_x
+ 
+        # See if we hit the player
+        hit = pygame.sprite.collide_rect(self, self.player)
+        if hit:
+            # We did hit the player. Shove the player around and
+            # assume he/she won't hit anything else.
+ 
+            # If we are moving right, set our right side
+            # to the left side of the item we hit
+            if self.change_x < 0:
+                self.player.rect.right = self.rect.left
+            else:
+                # Otherwise if we are moving left, do the opposite.
+                self.player.rect.left = self.rect.right
+ 
+        # Move up/down
+        self.rect.y += self.change_y
+ 
+        # Check and see if we the player
+        hit = pygame.sprite.collide_rect(self, self.player)
+        if hit:
+            # We did hit the player. Shove the player around and
+            # assume he/she won't hit anything else.
+ 
+            # Reset our position based on the top/bottom of the object.
+            if self.change_y < 0:
+                self.player.rect.bottom = self.rect.top
+            else:
+                self.player.rect.top = self.rect.bottom
+ 
+        # Check the boundaries and see if we need to reverse
+        # direction.
+        if self.rect.bottom > self.boundary_bottom or self.rect.top < self.boundary_top:
+            self.change_y *= -1
+ 
+        cur_pos = self.rect.x - self.level.world_shift
+        if cur_pos < self.boundary_left or cur_pos > self.boundary_right:
+            self.change_x *= -1
+
 
 class Level_01(Level):
     """ Definition for level 1. """
@@ -235,9 +300,9 @@ class Level_01(Level):
         # Array with width, height, x, and y of platform
         level = [[210, 70, 480, 550],
                  [210, 70, 200, 400],
-                 [210, 70, 600, 300],
+                 [900, 70, 690, 300],
                  [30, 300, 660, 300],
-                 [50, 50, (-1*self.level_limit), 300],
+                 
                  ]
  
         # Go through the array above and add platforms
@@ -247,6 +312,38 @@ class Level_01(Level):
             block.rect.y = platform[3]
             block.player = self.player
             self.platform_list.add(block)
+            
+class Level_02(Level):
+    """ Definition for level 2. """
+ 
+    def __init__(self, player):
+        """ Create level 2. """
+ 
+        # Call the parent constructor
+        Level.__init__(self, player)
+        self.level_limit = -250 # Change level size and exit position
+        # Array with width, height, x, and y of platform
+        level = [[210, 70, 0, 300],
+                 [210,70,150,550],
+                 ]
+ 
+        # Go through the array above and add platforms
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)  
+            # Add a custom moving platform
+            block = MovingPlatform(70, 70)
+            block.rect.x = 1500
+            block.rect.y = 300
+            block.boundary_top = 100
+            block.boundary_bottom = 550
+            block.change_y = -1
+            block.player = self.player
+            block.level = self
+            self.platform_list.add(block)        
             
 def main():
     """ Main Program """
@@ -263,7 +360,8 @@ def main():
  
     # Create all the levels
     level_list = []
-    level_list.append( Level_01(player) )
+    level_list.append(Level_01(player))
+    level_list.append(Level_02(player))
  
     # Set the current level
     current_level_no = 0
