@@ -184,7 +184,7 @@ class Level(object):
     def update(self):
         """ Update everything in this level."""
         self.platform_list.update()
-        self.player = player
+        
         self.enemy_list.update()
  
     def draw(self, screen):
@@ -321,10 +321,10 @@ class Level_02(Level):
  
         # Call the parent constructor
         Level.__init__(self, player)
-        self.level_limit = -250 # Change level size and exit position
+        self.level_limit = -1000 # Change level size and exit position
         # Array with width, height, x, and y of platform
         level = [[210, 70, 0, 300],
-                 [210,70,150,550],
+                 
                  ]
  
         # Go through the array above and add platforms
@@ -336,11 +336,11 @@ class Level_02(Level):
             self.platform_list.add(block)  
             # Add a custom moving platform
             block = MovingPlatform(70, 70)
-            block.rect.x = 1500
+            block.rect.x = 200
             block.rect.y = 300
-            block.boundary_top = 100
-            block.boundary_bottom = 550
-            block.change_y = -1
+            block.boundary_top = 300
+            block.boundary_bottom = 560
+            block.change_y = -2
             block.player = self.player
             block.level = self
             self.platform_list.add(block)        
