@@ -1,3 +1,9 @@
+#\\TODO: Start all levels at y = 300 and make ground kill you
+   #Level 3: all moving platforms
+
+
+
+
 # GMO Island II: Epileptic Boogaloo`
 # By NoiseGenerator
 # Licensed under GNU GPL
@@ -95,6 +101,8 @@ class Player(pygame.sprite.Sprite):
  
             # Stop our vertical movement
             self.new_y = 0
+            
+        
  
     def calc_grav(self):
         """ Calculate effect of gravity. """
@@ -207,6 +215,7 @@ class Level(object):
         # Go through all the sprite lists and shift
         for platform in self.platform_list:
             platform.rect.x += shift_x
+            platform.image.fill((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
  
         for enemy in self.enemy_list:
             enemy.rect.x += shift_x
@@ -307,11 +316,13 @@ class Level_01(Level):
  
         # Go through the array above and add platforms
         for platform in level:
+            
             block = Platform(platform[0], platform[1])
             block.rect.x = platform[2]
             block.rect.y = platform[3]
             block.player = self.player
             self.platform_list.add(block)
+            
             
 class Level_02(Level):
     """ Definition for level 2. """
@@ -324,7 +335,10 @@ class Level_02(Level):
         self.level_limit = -1000 # Change level size and exit position
         # Array with width, height, x, and y of platform
         level = [[210, 70, 0, 300],
-                 
+                 [20, 70, 280, 300],
+                 [210, 70, 600, 300],
+                 [2000, 70, 1150, 300],
+                 [70, 500, 1200, 300]
                  ]
  
         # Go through the array above and add platforms
@@ -335,16 +349,54 @@ class Level_02(Level):
             block.player = self.player
             self.platform_list.add(block)  
             # Add a custom moving platform
-            block = MovingPlatform(70, 70)
-            block.rect.x = 200
+            block = MovingPlatform(70, 30)
+            block.rect.x = 210
             block.rect.y = 300
             block.boundary_top = 300
-            block.boundary_bottom = 560
+            block.boundary_bottom = 600
             block.change_y = -2
             block.player = self.player
             block.level = self
-            self.platform_list.add(block)        
+            self.platform_list.add(block)   
             
+class Level_03(Level):
+    """ Definition for level 3. """
+ 
+    def __init__(self, player):
+        """ Create level 3. """
+ 
+        # Call the parent constructor
+        Level.__init__(self, player)
+        self.level_limit = -500 # Change level size and exit position
+        # Array with width, height, x, and y of platform
+        level = [[210, 70, 0, 300],
+                 [210, 500, 210, 300]
+                 ]
+ 
+        # Go through the array above and add platforms
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)
+            for i in range(5):
+                # Add a custom moving platform
+                block = MovingPlatform(210, 30)
+                block.rect.x = 200+(200*i)
+                block.rect.y = 300
+                block.boundary_top = 300
+                block.boundary_bottom = 600
+                block.change_y = -2
+                block.player = self.player
+                block.level = self
+                self.platform_list.add(block)
+                
+        
+                        
+        
+        
+        
 def main():
     """ Main Program """
     pygame.init()
@@ -362,6 +414,7 @@ def main():
     level_list = []
     level_list.append(Level_01(player))
     level_list.append(Level_02(player))
+    level_list.append(Level_03(player))
  
     # Set the current level
     current_level_no = 0
@@ -399,6 +452,8 @@ def main():
                     player.jump()
                 if event.key == pygame.K_DOWN:
                     player.block()
+                
+                    
             
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player.new_x < 0:
