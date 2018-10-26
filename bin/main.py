@@ -1,4 +1,4 @@
-#\\TODO: Start all levels at y = 300 and make ground kill you
+#\\TODO: Make ground kill you properly
    #Level 3: all moving platforms
 
 
@@ -61,6 +61,8 @@ class Player(pygame.sprite.Sprite):
         # Set speed vector of player
         self.new_x = 0
         self.new_y = 0
+        
+        self.rect.y = 300
  
         # List of sprites we can bump against
         self.level = None
@@ -307,8 +309,7 @@ class Level_01(Level):
         Level.__init__(self, player)
         self.level_limit = -250 # Change level size and exit position
         # Array with width, height, x, and y of platform
-        level = [[210, 70, 480, 550],
-                 [210, 70, 200, 400],
+        level = [[210, 70, 200, 400],
                  [900, 70, 690, 300],
                  [30, 300, 660, 300],
                  
@@ -334,30 +335,21 @@ class Level_02(Level):
         Level.__init__(self, player)
         self.level_limit = -1000 # Change level size and exit position
         # Array with width, height, x, and y of platform
-        level = [[210, 70, 0, 300],
-                 [20, 70, 280, 300],
+        level = [[300, 70, 0, 300],
                  [210, 70, 600, 300],
                  [2000, 70, 1150, 300],
                  [70, 500, 1200, 300]
                  ]
- 
         # Go through the array above and add platforms
         for platform in level:
+            
             block = Platform(platform[0], platform[1])
             block.rect.x = platform[2]
             block.rect.y = platform[3]
             block.player = self.player
-            self.platform_list.add(block)  
-            # Add a custom moving platform
-            block = MovingPlatform(70, 30)
-            block.rect.x = 210
-            block.rect.y = 300
-            block.boundary_top = 300
-            block.boundary_bottom = 600
-            block.change_y = -2
-            block.player = self.player
-            block.level = self
-            self.platform_list.add(block)   
+            self.platform_list.add(block)        
+ 
+         
             
 class Level_03(Level):
     """ Definition for level 3. """
@@ -367,7 +359,7 @@ class Level_03(Level):
  
         # Call the parent constructor
         Level.__init__(self, player)
-        self.level_limit = -500 # Change level size and exit position
+        self.level_limit = -1000 # Change level size and exit position
         # Array with width, height, x, and y of platform
         level = [[210, 70, 0, 300],
                  [210, 500, 210, 300]
@@ -380,10 +372,10 @@ class Level_03(Level):
             block.rect.y = platform[3]
             block.player = self.player
             self.platform_list.add(block)
-            for i in range(5):
+            for i in range(3):
                 # Add a custom moving platform
                 block = MovingPlatform(210, 30)
-                block.rect.x = 200+(200*i)
+                block.rect.x = 1000+(1000*i)
                 block.rect.y = 300
                 block.boundary_top = 300
                 block.boundary_bottom = 600
@@ -391,11 +383,19 @@ class Level_03(Level):
                 block.player = self.player
                 block.level = self
                 self.platform_list.add(block)
-                
-        
-                        
-        
-        
+            for i in range(3):
+                # Add a custom moving platform
+                block = MovingPlatform(210, 30)
+                block.rect.x = 500+(500*i)
+                block.rect.y = 400
+                block.boundary_top = 300
+                block.boundary_bottom = 600
+                block.change_y = -2
+                block.player = self.player
+                block.level = self
+                self.platform_list.add(block)
+                     
+ 
         
 def main():
     """ Main Program """
@@ -424,7 +424,7 @@ def main():
     player.level = current_level
  
     player.rect.x = 340
-    player.rect.y = SCREEN_HEIGHT - player.rect.height
+    player.rect.y = 300
     all_sprites_list.add(player)
  
     # Loop until the user clicks the close button.
@@ -468,6 +468,12 @@ def main():
         all_sprites_list.update() 
         # Update items in the level
         current_level.update()
+        
+        # If the player touches the bottom of the screen, reset their position.
+        if player.rect.bottom >= SCREEN_HEIGHT:
+            player.rect.x = 0
+            player.rect.y = 300
+        
     
         # If the player gets near the right side, shift the world left (-x)
         if player.rect.right >= 500:
