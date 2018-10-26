@@ -1,6 +1,10 @@
-#\\TODO: Make ground kill you properly
-   #Level 3: all moving platforms
-
+## TODO ##
+# 1. Cannot jump off moving platforms
+# 2. Level 3 broken
+# 3. Dying moves you backwards
+# 4. Add left borders
+# 5. Add enemies
+# 6. Fix level loading
 
 
 
@@ -189,8 +193,10 @@ class Level(object):
         # How far this world has been scrolled left/right
         self.world_shift = 0
         self.level_limit = -1000
+        self.level_limit_left = 0
+    
  
-    # Update everythign on this level
+    # Update everything on this level
     def update(self):
         """ Update everything in this level."""
         self.platform_list.update()
@@ -309,9 +315,10 @@ class Level_01(Level):
         Level.__init__(self, player)
         self.level_limit = -250 # Change level size and exit position
         # Array with width, height, x, and y of platform
-        level = [[210, 70, 200, 400],
+        level = [[610, 70, -200, 400],
                  [900, 70, 690, 300],
                  [30, 300, 660, 300],
+                 [24,24,self.level_limit_left,300],
                  
                  ]
  
@@ -335,7 +342,7 @@ class Level_02(Level):
         Level.__init__(self, player)
         self.level_limit = -1000 # Change level size and exit position
         # Array with width, height, x, and y of platform
-        level = [[300, 70, 0, 300],
+        level = [[400, 70, -100, 300],
                  [210, 70, 600, 300],
                  [2000, 70, 1150, 300],
                  [70, 500, 1200, 300]
@@ -356,13 +363,14 @@ class Level_03(Level):
  
     def __init__(self, player):
         """ Create level 3. """
- 
+        
         # Call the parent constructor
         Level.__init__(self, player)
-        self.level_limit = -1000 # Change level size and exit position
+        self.level_limit = -1500 # Change level size and exit position
         # Array with width, height, x, and y of platform
-        level = [[210, 70, 0, 300],
-                 [210, 500, 210, 300]
+        level = [[310, 70, -100, 300],
+                 [70, 500, 210, 300],
+                 [1000, 70, 2000, 300]
                  ]
  
         # Go through the array above and add platforms
@@ -372,7 +380,7 @@ class Level_03(Level):
             block.rect.y = platform[3]
             block.player = self.player
             self.platform_list.add(block)
-            for i in range(3):
+            for i in range(1):
                 # Add a custom moving platform
                 block = MovingPlatform(210, 30)
                 block.rect.x = 1000+(1000*i)
@@ -383,10 +391,10 @@ class Level_03(Level):
                 block.player = self.player
                 block.level = self
                 self.platform_list.add(block)
-            for i in range(3):
+            for i in range(2):
                 # Add a custom moving platform
                 block = MovingPlatform(210, 30)
-                block.rect.x = 500+(500*i)
+                block.rect.x = 500+(1000*i)
                 block.rect.y = 400
                 block.boundary_top = 300
                 block.boundary_bottom = 600
@@ -394,7 +402,28 @@ class Level_03(Level):
                 block.player = self.player
                 block.level = self
                 self.platform_list.add(block)
-                     
+                
+class Level_04(Level):
+    """ Definition for level 4. """
+ 
+    def __init__(self, player):
+        """ Create level 4. """
+        
+        # Call the parent constructor
+        Level.__init__(self, player)
+        self.level_limit = -1000 # Change level size and exit position
+        # Array with width, height, x, and y of platform
+        level = [[310, 70, -100, 300],
+                 
+                 ]
+ 
+        # Go through the array above and add platforms
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)                     
  
         
 def main():
@@ -412,9 +441,12 @@ def main():
  
     # Create all the levels
     level_list = []
-    level_list.append(Level_01(player))
-    level_list.append(Level_02(player))
-    level_list.append(Level_03(player))
+    level_number = 4
+    
+    for i in range(level_number):
+        
+        level_list.append(Level_04(player))
+    
  
     # Set the current level
     current_level_no = 0
@@ -482,12 +514,12 @@ def main():
             current_level.shift_world(-diff)
     
         # If the player gets near the left side, shift the world right (+x)
-        if player.rect.left <= 120:
+        if player.rect.left <= 120 and (current_level.level_limit_left >= current_level.world_shift):
             diff = 120 - player.rect.left
             player.rect.left = 120
             current_level.shift_world(diff)
     
-        # If the player gets to the end of the level, go to the next level
+        # If the player gets to the end of the level, go to the next level, and allow the player to move backa level.
         current_position = player.rect.x + current_level.world_shift
         if current_position < current_level.level_limit:
             if current_level_no < len(level_list)-1:
@@ -498,7 +530,9 @@ def main():
             else:
                 # Out of levels. This just exits the program.
                 # You'll want to do something better.
-                done = True      
+                done = True 
+        #if current_position <= current_level.level_limit_left:
+         #   player.new_x = 0
         
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
         current_level.draw(screen)
